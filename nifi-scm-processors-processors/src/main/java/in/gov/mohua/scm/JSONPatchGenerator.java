@@ -66,7 +66,7 @@ public class JSONPatchGenerator extends AbstractProcessor {
             .Builder().name("MY_PROPERTY")
             .displayName("My property")
             .description("Example Property")
-            .required(true)
+            .required(false)
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .build();
 
