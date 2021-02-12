@@ -33,7 +33,6 @@ public class ATCSDataProcessingTest {
 
     @Test
     public void testMapProperty() {
-        testRunner.setProperty(ATCSDataProcessing.MAPPING_FILE_PROPERTY, "/Users/abhishek/Documents/Projects/ISCF/DataSpace/Faridabad/nifi/data/map.json");
         testRunner.setProperty(ATCSDataProcessing.STATIC_DATA_FILE_PROPERTY, "/Users/abhishek/Documents/Projects/ISCF/DataSpace/Faridabad/nifi/data/static.json");
 
         testRunner.run();
