@@ -45,12 +45,28 @@ public final class TrafficSignalRealtime {
     STATUS_UNDER_MAINTAINANCE(2),
     /**
      * <pre>
+     * Signal(s) are flashing amber light. Traffic can proceed with caution. 
+     * </pre>
+     *
+     * <code>STATUS_AMBER_FLASHING = 3;</code>
+     */
+    STATUS_AMBER_FLASHING(3),
+    /**
+     * <pre>
+     * Some of the signals are operational.
+     * </pre>
+     *
+     * <code>STATUS_PARTIALLY_CLOSED = 4;</code>
+     */
+    STATUS_PARTIALLY_CLOSED(4),
+    /**
+     * <pre>
      * This entity is closed due to unknown reason.
      * </pre>
      *
-     * <code>STATUS_CLOSED_OR_OFF = 3;</code>
+     * <code>STATUS_CLOSED_OR_OFF = 5;</code>
      */
-    STATUS_CLOSED_OR_OFF(3),
+    STATUS_CLOSED_OR_OFF(5),
     UNRECOGNIZED(-1),
     ;
 
@@ -80,12 +96,28 @@ public final class TrafficSignalRealtime {
     public static final int STATUS_UNDER_MAINTAINANCE_VALUE = 2;
     /**
      * <pre>
+     * Signal(s) are flashing amber light. Traffic can proceed with caution. 
+     * </pre>
+     *
+     * <code>STATUS_AMBER_FLASHING = 3;</code>
+     */
+    public static final int STATUS_AMBER_FLASHING_VALUE = 3;
+    /**
+     * <pre>
+     * Some of the signals are operational.
+     * </pre>
+     *
+     * <code>STATUS_PARTIALLY_CLOSED = 4;</code>
+     */
+    public static final int STATUS_PARTIALLY_CLOSED_VALUE = 4;
+    /**
+     * <pre>
      * This entity is closed due to unknown reason.
      * </pre>
      *
-     * <code>STATUS_CLOSED_OR_OFF = 3;</code>
+     * <code>STATUS_CLOSED_OR_OFF = 5;</code>
      */
-    public static final int STATUS_CLOSED_OR_OFF_VALUE = 3;
+    public static final int STATUS_CLOSED_OR_OFF_VALUE = 5;
 
 
     public final int getNumber() {
@@ -115,7 +147,9 @@ public final class TrafficSignalRealtime {
         case 0: return STATUS_UNKNOWN;
         case 1: return STATUS_NORMAL_OPERATION;
         case 2: return STATUS_UNDER_MAINTAINANCE;
-        case 3: return STATUS_CLOSED_OR_OFF;
+        case 3: return STATUS_AMBER_FLASHING;
+        case 4: return STATUS_PARTIALLY_CLOSED;
+        case 5: return STATUS_CLOSED_OR_OFF;
         default: return null;
       }
     }
@@ -4740,17 +4774,27 @@ public final class TrafficSignalRealtime {
         getIdBytes();
 
     /**
-     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+     * <pre>
+     * Timestamp when data related to TrafficLane is updated.
+     * </pre>
+     *
+     * <code>uint64 updateTimestamp = 2;</code>
+     * @return The updateTimestamp.
+     */
+    long getUpdateTimestamp();
+
+    /**
+     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
      * @return Whether the signalTiming field is set.
      */
     boolean hasSignalTiming();
     /**
-     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
      * @return The signalTiming.
      */
     in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming getSignalTiming();
     /**
-     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
      */
     in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTimingOrBuilder getSignalTimingOrBuilder();
 
@@ -4759,7 +4803,7 @@ public final class TrafficSignalRealtime {
      * Indicates if the traffic can pass or must stop.
      * </pre>
      *
-     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 3;</code>
+     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 4;</code>
      * @return The enum numeric value on the wire for signalStatus.
      */
     int getSignalStatusValue();
@@ -4768,18 +4812,18 @@ public final class TrafficSignalRealtime {
      * Indicates if the traffic can pass or must stop.
      * </pre>
      *
-     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 3;</code>
+     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 4;</code>
      * @return The signalStatus.
      */
     in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalStatus getSignalStatus();
 
     /**
-     * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 4;</code>
+     * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 5;</code>
      * @return The enum numeric value on the wire for operationalStatus.
      */
     int getOperationalStatusValue();
     /**
-     * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 4;</code>
+     * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 5;</code>
      * @return The operationalStatus.
      */
     in.gov.mohua.ds.transit.TrafficSignalRealtime.OperationalStatus getOperationalStatus();
@@ -4843,7 +4887,12 @@ public final class TrafficSignalRealtime {
               id_ = s;
               break;
             }
-            case 18: {
+            case 16: {
+
+              updateTimestamp_ = input.readUInt64();
+              break;
+            }
+            case 26: {
               in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming.Builder subBuilder = null;
               if (signalTiming_ != null) {
                 subBuilder = signalTiming_.toBuilder();
@@ -4856,13 +4905,13 @@ public final class TrafficSignalRealtime {
 
               break;
             }
-            case 24: {
+            case 32: {
               int rawValue = input.readEnum();
 
               signalStatus_ = rawValue;
               break;
             }
-            case 32: {
+            case 40: {
               int rawValue = input.readEnum();
 
               operationalStatus_ = rawValue;
@@ -4907,39 +4956,87 @@ public final class TrafficSignalRealtime {
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
        * <pre>
+       * Signal status unknown.
+       * </pre>
+       *
+       * <code>SIGNAL_UNKNOWN = 0;</code>
+       */
+      SIGNAL_UNKNOWN(0),
+      /**
+       * <pre>
        * Traffic can pass.
        * </pre>
        *
-       * <code>SIGNAL_GO = 0;</code>
+       * <code>SIGNAL_GO = 1;</code>
        */
-      SIGNAL_GO(0),
+      SIGNAL_GO(1),
+      /**
+       * <pre>
+       * Ready to stop or watch and go.
+       * </pre>
+       *
+       * <code>SIGNAL_AMBER = 2;</code>
+       */
+      SIGNAL_AMBER(2),
       /**
        * <pre>
        * Traffic should stop at a designated place.
        * </pre>
        *
-       * <code>SIGNAL_STOP = 1;</code>
+       * <code>SIGNAL_STOP = 3;</code>
        */
-      SIGNAL_STOP(1),
+      SIGNAL_STOP(3),
+      /**
+       * <pre>
+       * Amber light is flashing. Traffic can proceed with caution.
+       * </pre>
+       *
+       * <code>SIGNAL_FLASHING = 4;</code>
+       */
+      SIGNAL_FLASHING(4),
       UNRECOGNIZED(-1),
       ;
 
       /**
        * <pre>
+       * Signal status unknown.
+       * </pre>
+       *
+       * <code>SIGNAL_UNKNOWN = 0;</code>
+       */
+      public static final int SIGNAL_UNKNOWN_VALUE = 0;
+      /**
+       * <pre>
        * Traffic can pass.
        * </pre>
        *
-       * <code>SIGNAL_GO = 0;</code>
+       * <code>SIGNAL_GO = 1;</code>
        */
-      public static final int SIGNAL_GO_VALUE = 0;
+      public static final int SIGNAL_GO_VALUE = 1;
+      /**
+       * <pre>
+       * Ready to stop or watch and go.
+       * </pre>
+       *
+       * <code>SIGNAL_AMBER = 2;</code>
+       */
+      public static final int SIGNAL_AMBER_VALUE = 2;
       /**
        * <pre>
        * Traffic should stop at a designated place.
        * </pre>
        *
-       * <code>SIGNAL_STOP = 1;</code>
+       * <code>SIGNAL_STOP = 3;</code>
        */
-      public static final int SIGNAL_STOP_VALUE = 1;
+      public static final int SIGNAL_STOP_VALUE = 3;
+      /**
+       * <pre>
+       * Amber light is flashing. Traffic can proceed with caution.
+       * </pre>
+       *
+       * <code>SIGNAL_FLASHING = 4;</code>
+       */
+      public static final int SIGNAL_FLASHING_VALUE = 4;
 
 
       public final int getNumber() {
@@ -4966,8 +5063,11 @@ public final class TrafficSignalRealtime {
        */
       public static SignalStatus forNumber(int value) {
         switch (value) {
-          case 0: return SIGNAL_GO;
-          case 1: return SIGNAL_STOP;
+          case 0: return SIGNAL_UNKNOWN;
+          case 1: return SIGNAL_GO;
+          case 2: return SIGNAL_AMBER;
+          case 3: return SIGNAL_STOP;
+          case 4: return SIGNAL_FLASHING;
           default: return null;
         }
       }
@@ -5778,10 +5878,25 @@ public final class TrafficSignalRealtime {
       }
     }
 
-    public static final int SIGNALTIMING_FIELD_NUMBER = 2;
+    public static final int UPDATETIMESTAMP_FIELD_NUMBER = 2;
+    private long updateTimestamp_;
+    /**
+     * <pre>
+     * Timestamp when data related to TrafficLane is updated.
+     * </pre>
+     *
+     * <code>uint64 updateTimestamp = 2;</code>
+     * @return The updateTimestamp.
+     */
+    @java.lang.Override
+    public long getUpdateTimestamp() {
+      return updateTimestamp_;
+    }
+
+    public static final int SIGNALTIMING_FIELD_NUMBER = 3;
     private in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming signalTiming_;
     /**
-     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
      * @return Whether the signalTiming field is set.
      */
     @java.lang.Override
@@ -5789,7 +5904,7 @@ public final class TrafficSignalRealtime {
       return signalTiming_ != null;
     }
     /**
-     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
      * @return The signalTiming.
      */
     @java.lang.Override
@@ -5797,21 +5912,21 @@ public final class TrafficSignalRealtime {
       return signalTiming_ == null ? in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming.getDefaultInstance() : signalTiming_;
     }
     /**
-     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
      */
     @java.lang.Override
     public in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTimingOrBuilder getSignalTimingOrBuilder() {
       return getSignalTiming();
     }
 
-    public static final int SIGNALSTATUS_FIELD_NUMBER = 3;
+    public static final int SIGNALSTATUS_FIELD_NUMBER = 4;
     private int signalStatus_;
     /**
      * <pre>
      * Indicates if the traffic can pass or must stop.
      * </pre>
      *
-     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 3;</code>
+     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 4;</code>
      * @return The enum numeric value on the wire for signalStatus.
      */
     @java.lang.Override public int getSignalStatusValue() {
@@ -5822,7 +5937,7 @@ public final class TrafficSignalRealtime {
      * Indicates if the traffic can pass or must stop.
      * </pre>
      *
-     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 3;</code>
+     * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 4;</code>
      * @return The signalStatus.
      */
     @java.lang.Override public in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalStatus getSignalStatus() {
@@ -5831,17 +5946,17 @@ public final class TrafficSignalRealtime {
       return result == null ? in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalStatus.UNRECOGNIZED : result;
     }
 
-    public static final int OPERATIONALSTATUS_FIELD_NUMBER = 4;
+    public static final int OPERATIONALSTATUS_FIELD_NUMBER = 5;
     private int operationalStatus_;
     /**
-     * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 4;</code>
+     * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 5;</code>
      * @return The enum numeric value on the wire for operationalStatus.
      */
     @java.lang.Override public int getOperationalStatusValue() {
       return operationalStatus_;
     }
     /**
-     * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 4;</code>
+     * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 5;</code>
      * @return The operationalStatus.
      */
     @java.lang.Override public in.gov.mohua.ds.transit.TrafficSignalRealtime.OperationalStatus getOperationalStatus() {
@@ -5867,14 +5982,17 @@ public final class TrafficSignalRealtime {
       if (!getIdBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
       }
-      if (signalTiming_ != null) {
-        output.writeMessage(2, getSignalTiming());
+      if (updateTimestamp_ != 0L) {
+        output.writeUInt64(2, updateTimestamp_);
       }
-      if (signalStatus_ != in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalStatus.SIGNAL_GO.getNumber()) {
-        output.writeEnum(3, signalStatus_);
+      if (signalTiming_ != null) {
+        output.writeMessage(3, getSignalTiming());
+      }
+      if (signalStatus_ != in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalStatus.SIGNAL_UNKNOWN.getNumber()) {
+        output.writeEnum(4, signalStatus_);
       }
       if (operationalStatus_ != in.gov.mohua.ds.transit.TrafficSignalRealtime.OperationalStatus.STATUS_UNKNOWN.getNumber()) {
-        output.writeEnum(4, operationalStatus_);
+        output.writeEnum(5, operationalStatus_);
       }
       unknownFields.writeTo(output);
     }
@@ -5888,17 +6006,21 @@ public final class TrafficSignalRealtime {
       if (!getIdBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
       }
+      if (updateTimestamp_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(2, updateTimestamp_);
+      }
       if (signalTiming_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, getSignalTiming());
+          .computeMessageSize(3, getSignalTiming());
       }
-      if (signalStatus_ != in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalStatus.SIGNAL_GO.getNumber()) {
+      if (signalStatus_ != in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalStatus.SIGNAL_UNKNOWN.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(3, signalStatus_);
+          .computeEnumSize(4, signalStatus_);
       }
       if (operationalStatus_ != in.gov.mohua.ds.transit.TrafficSignalRealtime.OperationalStatus.STATUS_UNKNOWN.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(4, operationalStatus_);
+          .computeEnumSize(5, operationalStatus_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -5917,6 +6039,8 @@ public final class TrafficSignalRealtime {
 
       if (!getId()
           .equals(other.getId())) return false;
+      if (getUpdateTimestamp()
+          != other.getUpdateTimestamp()) return false;
       if (hasSignalTiming() != other.hasSignalTiming()) return false;
       if (hasSignalTiming()) {
         if (!getSignalTiming()
@@ -5937,6 +6061,9 @@ public final class TrafficSignalRealtime {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + ID_FIELD_NUMBER;
       hash = (53 * hash) + getId().hashCode();
+      hash = (37 * hash) + UPDATETIMESTAMP_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getUpdateTimestamp());
       if (hasSignalTiming()) {
         hash = (37 * hash) + SIGNALTIMING_FIELD_NUMBER;
         hash = (53 * hash) + getSignalTiming().hashCode();
@@ -6085,6 +6212,8 @@ public final class TrafficSignalRealtime {
         super.clear();
         id_ = "";
 
+        updateTimestamp_ = 0L;
+
         if (signalTimingBuilder_ == null) {
           signalTiming_ = null;
         } else {
@@ -6122,6 +6251,7 @@ public final class TrafficSignalRealtime {
       public in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane buildPartial() {
         in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane result = new in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane(this);
         result.id_ = id_;
+        result.updateTimestamp_ = updateTimestamp_;
         if (signalTimingBuilder_ == null) {
           result.signalTiming_ = signalTiming_;
         } else {
@@ -6180,6 +6310,9 @@ public final class TrafficSignalRealtime {
         if (!other.getId().isEmpty()) {
           id_ = other.id_;
           onChanged();
+        }
+        if (other.getUpdateTimestamp() != 0L) {
+          setUpdateTimestamp(other.getUpdateTimestamp());
         }
         if (other.hasSignalTiming()) {
           mergeSignalTiming(other.getSignalTiming());
@@ -6315,18 +6448,61 @@ public final class TrafficSignalRealtime {
         return this;
       }
 
+      private long updateTimestamp_ ;
+      /**
+       * <pre>
+       * Timestamp when data related to TrafficLane is updated.
+       * </pre>
+       *
+       * <code>uint64 updateTimestamp = 2;</code>
+       * @return The updateTimestamp.
+       */
+      @java.lang.Override
+      public long getUpdateTimestamp() {
+        return updateTimestamp_;
+      }
+      /**
+       * <pre>
+       * Timestamp when data related to TrafficLane is updated.
+       * </pre>
+       *
+       * <code>uint64 updateTimestamp = 2;</code>
+       * @param value The updateTimestamp to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUpdateTimestamp(long value) {
+        
+        updateTimestamp_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Timestamp when data related to TrafficLane is updated.
+       * </pre>
+       *
+       * <code>uint64 updateTimestamp = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUpdateTimestamp() {
+        
+        updateTimestamp_ = 0L;
+        onChanged();
+        return this;
+      }
+
       private in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming signalTiming_;
       private com.google.protobuf.SingleFieldBuilderV3<
           in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming, in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming.Builder, in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTimingOrBuilder> signalTimingBuilder_;
       /**
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
        * @return Whether the signalTiming field is set.
        */
       public boolean hasSignalTiming() {
         return signalTimingBuilder_ != null || signalTiming_ != null;
       }
       /**
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
        * @return The signalTiming.
        */
       public in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming getSignalTiming() {
@@ -6337,7 +6513,7 @@ public final class TrafficSignalRealtime {
         }
       }
       /**
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
        */
       public Builder setSignalTiming(in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming value) {
         if (signalTimingBuilder_ == null) {
@@ -6353,7 +6529,7 @@ public final class TrafficSignalRealtime {
         return this;
       }
       /**
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
        */
       public Builder setSignalTiming(
           in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming.Builder builderForValue) {
@@ -6367,7 +6543,7 @@ public final class TrafficSignalRealtime {
         return this;
       }
       /**
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
        */
       public Builder mergeSignalTiming(in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming value) {
         if (signalTimingBuilder_ == null) {
@@ -6385,7 +6561,7 @@ public final class TrafficSignalRealtime {
         return this;
       }
       /**
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
        */
       public Builder clearSignalTiming() {
         if (signalTimingBuilder_ == null) {
@@ -6399,7 +6575,7 @@ public final class TrafficSignalRealtime {
         return this;
       }
       /**
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
        */
       public in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming.Builder getSignalTimingBuilder() {
         
@@ -6407,7 +6583,7 @@ public final class TrafficSignalRealtime {
         return getSignalTimingFieldBuilder().getBuilder();
       }
       /**
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
        */
       public in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTimingOrBuilder getSignalTimingOrBuilder() {
         if (signalTimingBuilder_ != null) {
@@ -6418,7 +6594,7 @@ public final class TrafficSignalRealtime {
         }
       }
       /**
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 2;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalTiming signalTiming = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming, in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTiming.Builder, in.gov.mohua.ds.transit.TrafficSignalRealtime.TrafficLane.SignalTimingOrBuilder> 
@@ -6440,7 +6616,7 @@ public final class TrafficSignalRealtime {
        * Indicates if the traffic can pass or must stop.
        * </pre>
        *
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 3;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 4;</code>
        * @return The enum numeric value on the wire for signalStatus.
        */
       @java.lang.Override public int getSignalStatusValue() {
@@ -6451,7 +6627,7 @@ public final class TrafficSignalRealtime {
        * Indicates if the traffic can pass or must stop.
        * </pre>
        *
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 3;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 4;</code>
        * @param value The enum numeric value on the wire for signalStatus to set.
        * @return This builder for chaining.
        */
@@ -6466,7 +6642,7 @@ public final class TrafficSignalRealtime {
        * Indicates if the traffic can pass or must stop.
        * </pre>
        *
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 3;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 4;</code>
        * @return The signalStatus.
        */
       @java.lang.Override
@@ -6480,7 +6656,7 @@ public final class TrafficSignalRealtime {
        * Indicates if the traffic can pass or must stop.
        * </pre>
        *
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 3;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 4;</code>
        * @param value The signalStatus to set.
        * @return This builder for chaining.
        */
@@ -6498,7 +6674,7 @@ public final class TrafficSignalRealtime {
        * Indicates if the traffic can pass or must stop.
        * </pre>
        *
-       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 3;</code>
+       * <code>.atcs_traffic_signal_realtime.TrafficLane.SignalStatus signalStatus = 4;</code>
        * @return This builder for chaining.
        */
       public Builder clearSignalStatus() {
@@ -6510,14 +6686,14 @@ public final class TrafficSignalRealtime {
 
       private int operationalStatus_ = 0;
       /**
-       * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 4;</code>
+       * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 5;</code>
        * @return The enum numeric value on the wire for operationalStatus.
        */
       @java.lang.Override public int getOperationalStatusValue() {
         return operationalStatus_;
       }
       /**
-       * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 4;</code>
+       * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 5;</code>
        * @param value The enum numeric value on the wire for operationalStatus to set.
        * @return This builder for chaining.
        */
@@ -6528,7 +6704,7 @@ public final class TrafficSignalRealtime {
         return this;
       }
       /**
-       * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 4;</code>
+       * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 5;</code>
        * @return The operationalStatus.
        */
       @java.lang.Override
@@ -6538,7 +6714,7 @@ public final class TrafficSignalRealtime {
         return result == null ? in.gov.mohua.ds.transit.TrafficSignalRealtime.OperationalStatus.UNRECOGNIZED : result;
       }
       /**
-       * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 4;</code>
+       * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 5;</code>
        * @param value The operationalStatus to set.
        * @return This builder for chaining.
        */
@@ -6552,7 +6728,7 @@ public final class TrafficSignalRealtime {
         return this;
       }
       /**
-       * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 4;</code>
+       * <code>.atcs_traffic_signal_realtime.OperationalStatus operationalStatus = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearOperationalStatus() {
@@ -7761,23 +7937,27 @@ public final class TrafficSignalRealtime {
       "c_signal_realtime.TrafficLane\032h\n\016Vehicle" +
       "Density\022\035\n\025vehicleCountPerMinute\030\001 \001(\r\022\033" +
       "\n\023vehicleCountPerHour\030\002 \001(\r\022\032\n\022vehicleCo" +
-      "untPerDay\030\003 \001(\r\"\235\003\n\013TrafficLane\022\n\n\002id\030\001 " +
-      "\001(\t\022L\n\014signalTiming\030\002 \001(\01326.atcs_traffic" +
-      "_signal_realtime.TrafficLane.SignalTimin" +
-      "g\022L\n\014signalStatus\030\003 \001(\01626.atcs_traffic_s" +
-      "ignal_realtime.TrafficLane.SignalStatus\022" +
-      "J\n\021operationalStatus\030\004 \001(\0162/.atcs_traffi" +
-      "c_signal_realtime.OperationalStatus\032j\n\014S" +
-      "ignalTiming\022\035\n\025allocatedGreenSeconds\030\001 \001" +
-      "(\r\022\035\n\025availableGreenSeconds\030\002 \001(\r\022\034\n\024uti" +
-      "lisedGreenSeconds\030\003 \001(\r\".\n\014SignalStatus\022" +
-      "\r\n\tSIGNAL_GO\020\000\022\017\n\013SIGNAL_STOP\020\001\"H\n\010Corri" +
-      "dor\022\022\n\ncorridorId\030\001 \001(\t\022\024\n\014corridorName\030" +
-      "\002 \001(\t\022\022\n\njunctionId\030\003 \003(\t*}\n\021Operational" +
-      "Status\022\022\n\016STATUS_UNKNOWN\020\000\022\033\n\027STATUS_NOR" +
-      "MAL_OPERATION\020\001\022\035\n\031STATUS_UNDER_MAINTAIN" +
-      "ANCE\020\002\022\030\n\024STATUS_CLOSED_OR_OFF\020\003B\031\n\027in.g" +
-      "ov.mohua.ds.transitb\006proto3"
+      "untPerDay\030\003 \001(\r\"\361\003\n\013TrafficLane\022\n\n\002id\030\001 " +
+      "\001(\t\022\027\n\017updateTimestamp\030\002 \001(\004\022L\n\014signalTi" +
+      "ming\030\003 \001(\01326.atcs_traffic_signal_realtim" +
+      "e.TrafficLane.SignalTiming\022L\n\014signalStat" +
+      "us\030\004 \001(\01626.atcs_traffic_signal_realtime." +
+      "TrafficLane.SignalStatus\022J\n\021operationalS" +
+      "tatus\030\005 \001(\0162/.atcs_traffic_signal_realti" +
+      "me.OperationalStatus\032j\n\014SignalTiming\022\035\n\025" +
+      "allocatedGreenSeconds\030\001 \001(\r\022\035\n\025available" +
+      "GreenSeconds\030\002 \001(\r\022\034\n\024utilisedGreenSecon" +
+      "ds\030\003 \001(\r\"i\n\014SignalStatus\022\022\n\016SIGNAL_UNKNO" +
+      "WN\020\000\022\r\n\tSIGNAL_GO\020\001\022\020\n\014SIGNAL_AMBER\020\002\022\017\n" +
+      "\013SIGNAL_STOP\020\003\022\023\n\017SIGNAL_FLASHING\020\004\"H\n\010C" +
+      "orridor\022\022\n\ncorridorId\030\001 \001(\t\022\024\n\014corridorN" +
+      "ame\030\002 \001(\t\022\022\n\njunctionId\030\003 \003(\t*\265\001\n\021Operat" +
+      "ionalStatus\022\022\n\016STATUS_UNKNOWN\020\000\022\033\n\027STATU" +
+      "S_NORMAL_OPERATION\020\001\022\035\n\031STATUS_UNDER_MAI" +
+      "NTAINANCE\020\002\022\031\n\025STATUS_AMBER_FLASHING\020\003\022\033" +
+      "\n\027STATUS_PARTIALLY_CLOSED\020\004\022\030\n\024STATUS_CL" +
+      "OSED_OR_OFF\020\005B\031\n\027in.gov.mohua.ds.transit" +
+      "b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -7813,7 +7993,7 @@ public final class TrafficSignalRealtime {
     internal_static_atcs_traffic_signal_realtime_TrafficLane_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_atcs_traffic_signal_realtime_TrafficLane_descriptor,
-        new java.lang.String[] { "Id", "SignalTiming", "SignalStatus", "OperationalStatus", });
+        new java.lang.String[] { "Id", "UpdateTimestamp", "SignalTiming", "SignalStatus", "OperationalStatus", });
     internal_static_atcs_traffic_signal_realtime_TrafficLane_SignalTiming_descriptor =
       internal_static_atcs_traffic_signal_realtime_TrafficLane_descriptor.getNestedTypes().get(0);
     internal_static_atcs_traffic_signal_realtime_TrafficLane_SignalTiming_fieldAccessorTable = new
