@@ -43,6 +43,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,16 +85,23 @@ public class ATCSDataProcessing extends AbstractProcessor {
     Map<String, TrafficSignalRealtime.TrafficLane.Builder> middlewareTrafficLaneMap = null;
     Map<String, Integer> previousLanesUtilisedTime = null;
 
+    TrafficSignalRealtime.FeedMessage.Builder feedMessageBuilder = null;
+
     // f048d42f-ffa2-3e9e-93e4-984f9b394d8e
     UUID namespace = UUID.nameUUIDFromBytes("in.gov.mohua.scm.fscl".getBytes());
 
+    SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss aa");
+
     public static final PropertyDescriptor STATIC_DATA_FILE_PROPERTY = new PropertyDescriptor.Builder()
             .name("STATIC_DATA_FILE_PROPERTY").displayName("Static ATCS data file path")
-            .description("Static ATCS data file").required(true)
-            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR).build();
+            .description("Static ATCS data file").required(true).addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+            .build();
 
     public static final Relationship SUCCESS_RELATIONSHIP = new Relationship.Builder().name("success")
             .description("standardised data").build();
+
+    public static final Relationship SUCCESS_PROTO_BINARY_RELATIONSHIP = new Relationship.Builder().name("success proto binary")
+            .description("standardised proto binary data").build();
 
     public static final Relationship FAILURE_RELATIONSHIP = new Relationship.Builder().name("failure")
             .description("failed to standardise").build();
@@ -110,6 +119,7 @@ public class ATCSDataProcessing extends AbstractProcessor {
         final Set<Relationship> relationships = new HashSet<Relationship>();
         relationships.add(SUCCESS_RELATIONSHIP);
         relationships.add(FAILURE_RELATIONSHIP);
+        relationships.add(SUCCESS_PROTO_BINARY_RELATIONSHIP);
         this.relationships = Collections.unmodifiableSet(relationships);
 
         internalToExternalIdMap = new HashMap<String, String>();
@@ -121,8 +131,18 @@ public class ATCSDataProcessing extends AbstractProcessor {
         middlewareCarriagewayMap = new HashMap<String, TrafficSignalRealtime.Carriageway.Builder>();
         middlewareTrafficLaneMap = new HashMap<String, TrafficSignalRealtime.TrafficLane.Builder>();
 
-        // Lane utilised time if only available in the next cycle. 
+        // Lane utilised time if only available in the next cycle.
         previousLanesUtilisedTime = new HashMap<String, Integer>();
+
+        feedMessageBuilder = TrafficSignalRealtime.FeedMessage.newBuilder();
+        feedMessageBuilder.setHeader(HeaderOuterClass.Header.newBuilder()
+            .setIncrementality(HeaderOuterClass.Header.Incrementality.DIFFERENTIAL)
+            .setProvider(HeaderOuterClass.Provider.newBuilder()
+                .setId(namespace.toString())
+                .setName("Faridabad Smart City Limited")
+            )
+            .setVersion("v0.0.1")
+        );
     }
 
     @Override
@@ -144,30 +164,33 @@ public class ATCSDataProcessing extends AbstractProcessor {
     public void onPropertyModified(PropertyDescriptor descriptor, String oldValue, String newValue) {
         super.onPropertyModified(descriptor, oldValue, newValue);
 
-        if(descriptor == STATIC_DATA_FILE_PROPERTY) {
+        if (descriptor == STATIC_DATA_FILE_PROPERTY) {
             if (newValue == null || newValue.isEmpty()) {
                 return;
             }
 
             baseJunctionDataMap.clear();
 
-            TrafficSignalStatic.FeedMessage.Builder messageBuilder = TrafficSignalStatic.FeedMessage.newBuilder(); 
+            TrafficSignalStatic.FeedMessage.Builder messageBuilder = TrafficSignalStatic.FeedMessage.newBuilder();
 
             try {
                 JsonFormat.parser().merge(new FileReader(newValue), messageBuilder);
 
                 TrafficSignalStatic.FeedMessage message = messageBuilder.build();
-                
-                for(TrafficSignalStatic.Junction junction : message.getJunctionsList()) {
-                    TrafficSignalRealtime.Junction.Builder realtimeJunctionBuilder = TrafficSignalRealtime.Junction.newBuilder();
+
+                for (TrafficSignalStatic.Junction junction : message.getJunctionsList()) {
+                    TrafficSignalRealtime.Junction.Builder realtimeJunctionBuilder = TrafficSignalRealtime.Junction
+                            .newBuilder();
                     realtimeJunctionBuilder.setId(junction.getId());
 
-                    for(TrafficSignalStatic.Carriageway carriageway : junction.getCarriagewaysList()) {
-                        TrafficSignalRealtime.Carriageway.Builder realtimeCarriagewayBuilder = TrafficSignalRealtime.Carriageway.newBuilder();
+                    for (TrafficSignalStatic.Carriageway carriageway : junction.getCarriagewaysList()) {
+                        TrafficSignalRealtime.Carriageway.Builder realtimeCarriagewayBuilder = TrafficSignalRealtime.Carriageway
+                                .newBuilder();
                         realtimeCarriagewayBuilder.setId(carriageway.getId());
 
-                        for(TrafficSignalStatic.TrafficLane trafficLane : carriageway.getTrafficLanesList()) {
-                            TrafficSignalRealtime.TrafficLane.Builder realtimeTrafficLaneBuilder = TrafficSignalRealtime.TrafficLane.newBuilder();
+                        for (TrafficSignalStatic.TrafficLane trafficLane : carriageway.getTrafficLanesList()) {
+                            TrafficSignalRealtime.TrafficLane.Builder realtimeTrafficLaneBuilder = TrafficSignalRealtime.TrafficLane
+                                    .newBuilder();
                             realtimeTrafficLaneBuilder.setId(trafficLane.getId());
 
                             realtimeCarriagewayBuilder.addTrafficLanes(realtimeTrafficLaneBuilder);
@@ -175,7 +198,7 @@ public class ATCSDataProcessing extends AbstractProcessor {
 
                         realtimeJunctionBuilder.addCarriageways(realtimeCarriagewayBuilder);
                     }
-                    
+
                     baseJunctionDataMap.put(junction.getId(), realtimeJunctionBuilder);
                 }
 
@@ -187,80 +210,69 @@ public class ATCSDataProcessing extends AbstractProcessor {
                 e.printStackTrace();
             }
 
-        } /* else if (descriptor == MAPPING_FILE_PROPERTY) {
-            if (newValue == null || newValue.isEmpty()) {
-                return;
-            }
-
-            getLogger().info("Modifying map for ids");
-
-            if (!newValue.equals(oldValue)) {
-                try {
-                    JsonElement element = JsonParser.parseReader(new FileReader(newValue));
-                    JsonObject globalMapObj = element.getAsJsonObject();
-
-                    JsonArray junctionArray = globalMapObj.get("junctions").getAsJsonArray();
-
-                    for(int i = 0; i < junctionArray.size(); i++) {
-                        JsonObject junctionElement = junctionArray.get(i).getAsJsonObject();
-                        String junctionInternalId = junctionElement.get("internalId").getAsString();
-
-                        internalToExternalIdMap.put(
-                            junctionInternalId, 
-                            junctionElement.get("externalId").getAsString()
-                        );
-
-                        JsonArray wayArray = junctionElement.get("ways").getAsJsonArray();
-
-                        for(int j = 0; j < wayArray.size(); j++) {
-                            JsonObject wayElement = wayArray.get(j).getAsJsonObject();
-                            String wayInternalId = wayElement.get("internalId").getAsString();
-
-                            internalToExternalIdMap.put(
-                                junctionInternalId + wayInternalId,
-                                wayElement.get("externalId").getAsString()
-                            );
-                        }
-
-                        JsonArray laneArray = junctionElement.get("lanes").getAsJsonArray();
-
-                        //junctionStageToLanes.put(junctionInternalId + wayInternalId, laneArray);
-
-                        for(int k = 0; k < laneArray.size(); k++) {
-                            JsonObject laneElement = laneArray.get(k).getAsJsonObject();
-                            String laneInternalId = laneElement.get("internalId").getAsString();
-
-                            internalToExternalIdMap.put(
-                                junctionInternalId + laneInternalId,
-                                laneElement.get("externalId").getAsString()
-                            );
-                        }
-                    }
-
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        } */
+        } /*
+           * else if (descriptor == MAPPING_FILE_PROPERTY) { if (newValue == null ||
+           * newValue.isEmpty()) { return; }
+           * 
+           * getLogger().info("Modifying map for ids");
+           * 
+           * if (!newValue.equals(oldValue)) { try { JsonElement element =
+           * JsonParser.parseReader(new FileReader(newValue)); JsonObject globalMapObj =
+           * element.getAsJsonObject();
+           * 
+           * JsonArray junctionArray = globalMapObj.get("junctions").getAsJsonArray();
+           * 
+           * for(int i = 0; i < junctionArray.size(); i++) { JsonObject junctionElement =
+           * junctionArray.get(i).getAsJsonObject(); String junctionInternalId =
+           * junctionElement.get("internalId").getAsString();
+           * 
+           * internalToExternalIdMap.put( junctionInternalId,
+           * junctionElement.get("externalId").getAsString() );
+           * 
+           * JsonArray wayArray = junctionElement.get("ways").getAsJsonArray();
+           * 
+           * for(int j = 0; j < wayArray.size(); j++) { JsonObject wayElement =
+           * wayArray.get(j).getAsJsonObject(); String wayInternalId =
+           * wayElement.get("internalId").getAsString();
+           * 
+           * internalToExternalIdMap.put( junctionInternalId + wayInternalId,
+           * wayElement.get("externalId").getAsString() ); }
+           * 
+           * JsonArray laneArray = junctionElement.get("lanes").getAsJsonArray();
+           * 
+           * //junctionStageToLanes.put(junctionInternalId + wayInternalId, laneArray);
+           * 
+           * for(int k = 0; k < laneArray.size(); k++) { JsonObject laneElement =
+           * laneArray.get(k).getAsJsonObject(); String laneInternalId =
+           * laneElement.get("internalId").getAsString();
+           * 
+           * internalToExternalIdMap.put( junctionInternalId + laneInternalId,
+           * laneElement.get("externalId").getAsString() ); } }
+           * 
+           * } catch (FileNotFoundException e) { e.printStackTrace(); }
+           * 
+           * } }
+           */
     }
 
-    private void processLanes(
-        JsonObject internalData, 
-        JsonObject stageObject, 
-        String junctionInternalId, 
-        String junctionExternalId,
-        String stageInternalId, 
-        String activeStageInternalId,
-        Integer currentSeqNumber,
-        Integer setSeqNumber
-    ) {
-        if(stageInternalId.equals(activeStageInternalId)) {
+    private void processLanes(JsonObject internalData, JsonObject stageObject, String junctionInternalId,
+            String junctionExternalId, String stageInternalId, String activeStageInternalId, Integer currentSeqNumber,
+            Integer setSeqNumber) {
+        if (stageInternalId.equals(activeStageInternalId)) {
             JsonArray trafficLaneArray = internalData.get("alLinkedPhaseJSON").getAsJsonArray();
 
-            for(int l = 0; l < trafficLaneArray.size(); l++) {
+            for (int l = 0; l < trafficLaneArray.size(); l++) {
                 String phaseInternalId = trafficLaneArray.get(l).getAsJsonObject().get("nPhaseNo").getAsString();
                 String phaseExternalId = getTrafficLaneUUID(junctionInternalId, phaseInternalId);
+
+                // Timestamp in seconds.
+                long updateTimestamp = 0;
+                try {
+                    updateTimestamp = sdf.parse(stageObject.get("tSystemTime").getAsString()).getTime() / 1000;
+                } catch (ParseException e) {
+                    updateTimestamp = System.currentTimeMillis() / 1000;
+                    e.printStackTrace();
+                }
 
                 TrafficLane.Builder trafficLaneBuider = TrafficLane.newBuilder()
                     .setId(phaseExternalId)
@@ -269,6 +281,7 @@ public class ATCSDataProcessing extends AbstractProcessor {
                         .setAllocatedGreenSeconds(stageObject.get("nAllocatedGreen").getAsInt())
                         .setAvailableGreenSeconds(stageObject.get("nAvailableGreen").getAsInt())
                     )
+                    .setUpdateTimestamp(updateTimestamp)
                     .setOperationalStatusValue(TrafficSignalRealtime.OperationalStatus.STATUS_NORMAL_OPERATION_VALUE);
 
                 middlewareTrafficLaneMap.put(
@@ -521,6 +534,7 @@ public class ATCSDataProcessing extends AbstractProcessor {
         });
 
         TrafficSignalRealtime.Junction junction;
+        
 
         if(value.get().get("nStatus").getAsString().equals("1")) {
             if(value.get().get("sMode").getAsString().equals("FullVA-Split") || value.get().get("sMode").getAsString().equals("FixedTime")) {
@@ -540,17 +554,29 @@ public class ATCSDataProcessing extends AbstractProcessor {
         flowFile = session.putAttribute(flowFile, "Content-Type", "application/json");
         flowFile = session.putAttribute(flowFile, "mime.type", "application/json");
 
+        TrafficSignalRealtime.FeedMessage.Builder localFeedMessageBuilder = feedMessageBuilder.clone();
+        localFeedMessageBuilder.getHeaderBuilder().setTimestamp(System.currentTimeMillis() / 1000);
+        TrafficSignalRealtime.FeedMessage feedMessage = localFeedMessageBuilder.addJunctions(junction).build();
+
         session.write(flowFile, new OutputStreamCallback(){
             @Override
             public void process(OutputStream out) throws IOException {
-                String junctionJsonString = JsonFormat.printer().sortingMapKeys().print(junction);
+                String junctionJsonString = JsonFormat.printer().sortingMapKeys().print(feedMessage);
                 out.write(junctionJsonString.getBytes());
                 // out.write((previousLanesUtilisedTime.toString()).getBytes());
             }
         });
-
-        
-
         session.transfer(flowFile, SUCCESS_RELATIONSHIP);
+
+        FlowFile binaryFlowFile = session.create();
+        binaryFlowFile = session.putAttribute(binaryFlowFile, "Content-Type", "application/x-binary");
+        binaryFlowFile = session.putAttribute(binaryFlowFile, "mime.type", "application/x-binary");
+        session.write(binaryFlowFile, new OutputStreamCallback(){
+            @Override
+            public void process(OutputStream out) throws IOException {
+                out.write(feedMessage.toByteArray());
+            }
+        });
+        session.transfer(binaryFlowFile, SUCCESS_PROTO_BINARY_RELATIONSHIP);
     }
 }
