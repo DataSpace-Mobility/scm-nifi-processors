@@ -451,11 +451,11 @@ public class ATCSDataProcessing extends AbstractProcessor {
                         trafficLaneBuilder.setSignalStatusValue(TrafficSignalRealtime.TrafficLane.SignalStatus.SIGNAL_STOP_VALUE);
 
                         // This cycle will also contain data on utilised green for previous cycle.
-                        if(previousLanesUtilisedTime.containsKey(trafficLaneBuilder.getId())) {
+                        if(previousLanesUtilisedTime.containsKey(junctionExternalId)) {
                             TrafficSignalRealtime.TrafficLane.SignalTiming.Builder signalTimingBuilder = trafficLaneBuilder.getSignalTimingBuilder();
                             
                             signalTimingBuilder.setUtilisedGreenSeconds(
-                                previousLanesUtilisedTime.get(trafficLaneBuilder.getId())
+                                previousLanesUtilisedTime.get(junctionExternalId)
                             );
 
                             trafficLaneBuilder.setSignalTiming(signalTimingBuilder);
@@ -545,7 +545,7 @@ public class ATCSDataProcessing extends AbstractProcessor {
             public void process(OutputStream out) throws IOException {
                 String junctionJsonString = JsonFormat.printer().sortingMapKeys().print(junction);
                 out.write(junctionJsonString.getBytes());
-                // out.write((baseJunctionDataMap.toString()).getBytes());
+                // out.write((previousLanesUtilisedTime.toString()).getBytes());
             }
         });
 
